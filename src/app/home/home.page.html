@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar >
+  <ion-toolbar>
     <ion-title style="background-color: lightskyblue; color: white;">
       Agenda de Contatos
     </ion-title>
@@ -9,9 +9,15 @@
 <ion-content>
 
   <ion-list>
-    <ion-item *ngFor="let contato of contatos">
-      <ion-label>{{contato.nome}}</ion-label>
-      <ion-label>{{contato.telefone}}</ion-label>
+    <ion-item *ngFor="let contato of contatos" padding-top="30px">
+      <ion-icon name="person-circle-sharp" height="2em" style="zoom:2.0;"></ion-icon>
+      <ion-label class="ion-padding-start">
+        <h1>{{contato.nome}}</h1>
+        <p>{{contato.genero}}</p>
+        <h1>{{contato.telefone}}</h1>
+        <p>Data de Nascimento: {{contato.dataNascimento}}</p>
+      </ion-label>
+
     </ion-item>
   </ion-list>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -19,5 +25,4 @@
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
-
 </ion-content>
