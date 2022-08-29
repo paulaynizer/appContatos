@@ -3,8 +3,11 @@ export class Contato {
     private _telefone: number;
     private _genero: string;
     private _dataNascimento : string;
+    private _id : any;
 
     constructor(nome : string, telefone : number, genero: string, dataNascimento : string){
+        let chave = new Date;
+        this._id = chave.getTime();
         this._nome = nome;
         this._telefone = telefone;
         this._genero = genero;
@@ -18,6 +21,9 @@ export class Contato {
     }
     public get genero() : string{
         return this._genero;
+    }
+    public get id() : any{
+        return this._id;
     }
     public get dataNascimento() : string{
         return this._dataNascimento;

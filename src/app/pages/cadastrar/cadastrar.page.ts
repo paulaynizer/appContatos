@@ -22,7 +22,6 @@ export class CadastrarPage implements OnInit {
   }
   cadastrar(){
     this.dataNascimento= this.dataNascimento.split('T')[0];
-    console.log(this.genero + " "+ this.dataNascimento)
     if((this.validar(this.nome)) && this.validar(this.telefone) && this.validar(this.genero) && this.validar(this.dataNascimento)){
       let contato : Contato = new Contato(this.nome, this.telefone, this.genero, this.dataNascimento);
       this.conatoService.inserir(contato);
