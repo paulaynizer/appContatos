@@ -17,7 +17,7 @@
       </span>
     </ion-item>
     <ion-item>
-      <ion-input placeholder="Telefone" formControlName="telefone"></ion-input>
+      <ion-input placeholder="Telefone" formControlName="telefone" [brmasker]="{phone:true}"></ion-input>
     </ion-item>
     <ion-item *ngIf="(((errorControl.telefone.touched)||(errorControl.telefone.dirty))&& errorControl.telefone.errors)">
       <span *ngIf="errorControl.telefone.errors?.required">
