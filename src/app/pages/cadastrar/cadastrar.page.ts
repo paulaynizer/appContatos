@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { Contato } from '../../models/contato';
@@ -10,33 +11,44 @@ import { ContatoService } from '../../services/contato.service';
   styleUrls: ['./cadastrar.page.scss'],
 })
 export class CadastrarPage implements OnInit {
-  nome : string;
-  telefone : number;
-  genero :string;
-  dataNascimento: string;
+  form_cadastrar : FormGroup;
+  isSubmitted: boolean = false;
   data: string;
-  constructor(private alertController: AlertController, private router: Router, private conatoService: ContatoService) {}
+  constructor(private alertController: AlertController, private router: Router,
+     private conatoService: ContatoService, private formBuilder:FormBuilder) {}
 
   ngOnInit() {
     this.data= new Date().toISOString();
+    this.form_cadastrar = this.formBuilder.group({
+      nome: ["", [Validators.required]], 
+      telefone: ["", [Validators.required, Validators.minLength(10)]],
+      genero: ["", [Validators.required]],
+      dataNascimento: ["", [Validators.required]]
+    });
   }
-  cadastrar(){
-    this.dataNascimento= this.dataNascimento.split('T')[0];
-    if((this.validar(this.nome)) && this.validar(this.telefone) && this.validar(this.genero) && this.validar(this.dataNascimento)){
-      let contato : Contato = new Contato(this.nome, this.telefone, this.genero, this.dataNascimento);
-      this.conatoService.inserir(contato);
-      this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
-      this.router.navigate(["/home"]);
-    }else{
+
+  get errorControl(){
+    return this.form_cadastrar.controls;
+  }
+
+  submitForm() : boolean{
+    this.isSubmitted = true;
+    if(!this.form_cadastrar.valid){
       this.presentAlert("Agenda", "Erro", "Todos os campos devem ser preenchidos.");
-    }
-  }
-  private validar(campo: any) : boolean{
-    if(!campo){
       return false;
+    }else{
+      this.cadastrar();
     }
-    return true;
   }
+
+  private cadastrar(){
+    
+    this.conatoService.inserir(this.form_cadastrar.value);
+    this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
+    this.router.navigate(["/home"]);
+    
+  }
+  
   async presentAlert(header: string, subHeader: string, message:string) {
     const alert = await this.alertController.create({
       header: header,
