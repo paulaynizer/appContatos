@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Contato } from '../../models/contato';
 import { ContatoService } from '../../services/contato.service';
 
 @Component({
@@ -15,7 +14,7 @@ export class CadastrarPage implements OnInit {
   isSubmitted: boolean = false;
   data: string;
   constructor(private alertController: AlertController, private router: Router,
-     private conatoService: ContatoService, private formBuilder:FormBuilder) {}
+     private contatoService: ContatoService, private formBuilder:FormBuilder) {}
 
   ngOnInit() {
     this.data= new Date().toISOString();
@@ -43,7 +42,7 @@ export class CadastrarPage implements OnInit {
 
   private cadastrar(){
     
-    this.conatoService.inserir(this.form_cadastrar.value);
+    this.contatoService.inserir(this.form_cadastrar.value);
     this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
     this.router.navigate(["/home"]);
     
