@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {  FormBuilder,FormGroup, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-
+import { TouchSequence } from 'selenium-webdriver';
 import { Contato } from 'src/app/models/contato';
 import { ContatoService } from 'src/app/services/contato.service';
 
@@ -13,103 +13,120 @@ import { ContatoService } from 'src/app/services/contato.service';
 })
 export class DetalharPage implements OnInit {
   contato: Contato;
-
-  form_editar : FormGroup;
+  data: string;
+  edicao: boolean = true;
+  form_cadastrar: FormGroup;
   isSubmitted: boolean = false;
-  data:string;
-  edicao:boolean = true;
-  constructor(private router: Router, private alertController: AlertController, 
-    private contatoService: ContatoService,  private formBuilder:FormBuilder) { }
+
+  constructor(private router: Router,
+    private alertController: AlertController,
+    private contatoService: ContatoService,
+    private formBuilder: FormBuilder) { }
 
   ngOnInit() {
+    this.data = new Date().toISOString();
     const nav = this.router.getCurrentNavigation();
     this.contato = nav.extras.state.objeto;
-    this.data= new Date().toISOString();
-    this.form_editar = this.formBuilder.group({
-      nome: [this.contato.nome, [Validators.required]], 
-      telefone: [this.contato.telefone, [Validators.required, Validators.minLength(10)]],
-      genero: [this.contato.genero, [Validators.required]],
-      dataNascimento: [this.contato.dataNascimento, [Validators.required]]
+    console.log(this.contato);
+    this.form_cadastrar = this.formBuilder.group({
+      nome:[this.contato.nome ,[Validators.required]],
+      telefone:[this.contato.telefone,[Validators.required, Validators.minLength(10)]],
+      genero:[this.contato.genero,[Validators.required]],
+      data_nascimento:[this.contato.data_nascimento ,[Validators.required]]
     });
-    
-  }
- alterarEdicao(){
-   if(this.edicao == true){
-     this.edicao = false;
-   }else{
-     this.edicao = true;
-   }
- }
-  editar(){
-    console.log(this.form_editar.value);
-    this.contatoService.editar(this.contato, this.form_editar.value.nome, this.form_editar.value.telefone, this.form_editar.value.genero, this.form_editar.value.dataNascimento)
-    this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
-    this.router.navigate(["/home"]);
-    
-  }
-  excluir(){
-    this.presentAlertConfirm("Agnda", "Excluir Contato", "Voce deseja realmente excluir contato?")
-  }
-  private excluirContato(){
-    if(this.contatoService.excluir(this.contato)){
-      this.presentAlert("Agenda", "Excluir", "Exclusão realizada");
-      this.router.navigate(["/home"]);
-    }else{
-      this.presentAlert("Agenda", "Erro", "Contato não encontrado");
-    }
-  }
-  async presentAlertConfirm(header: string, subHeader : string, message:string) {
-    const alert = await this.alertController.create({
-      header: header,
-      subHeader: subHeader,
-      message :message,
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-      
-          },
-        },
-        {
-          text: 'OK',
-          role: 'confirm',
-          handler: () => {
-            this.excluirContato();
-          },
-        },
-      ],
-    });
-
-    await alert.present();
   }
 
-  
-  async presentAlert(header: string, subHeader: string, message:string) {
-    const alert = await this.alertController.create({
-      header: header,
-      subHeader: subHeader,
-      message: message,
-      buttons: ['OK'],
-    });
-
-    await alert.present();
-  }
   get errorControl(){
-    return this.form_editar.controls;
+    return this.form_cadastrar.controls;
   }
 
-  submitForm() : boolean{
+  submitForm(): boolean{
     this.isSubmitted = true;
-    if(!this.form_editar.valid){
-      this.presentAlert("Agenda", "Erro", "Todos os campos devem ser preenchidos.");
+    if(!this.form_cadastrar.valid){
+      this.presentAlert("Agenda", "Erro",
+      "Todos os campos são Obrigatórios!");
       return false;
     }else{
       this.editar();
     }
   }
 
+  alterarEdicao(): void{
+    if(this.edicao == false){
+      this.edicao = true;
+    }else{
+      this.edicao = false;
+    }
+  }
 
-  
-  
+  editar(){
+    this.contatoService.editar(this.contato, this.form_cadastrar.value['nome'],
+    this.form_cadastrar.value['telefone'], this.form_cadastrar.value['genero'],
+    this.form_cadastrar.value['data_nascimento']);
+    this.presentAlert("Agenda", "Sucesso", "Edição Realizado");
+    this.router.navigate(["/home"]);
+  }
+
+  excluir(): void{
+    this.presentAlertConfirm("Agenda", "Excluir Contato",
+    "Você realmente deseja excluir o contato?",
+    this.excluirContato());
+  }
+
+excluirContato(){
+    if(this.contatoService.excluir(this.contato)){
+      this.presentAlert("Agenda", "Sucesso", "Cadastro Excluído!");
+      this.router.navigate(["/home"]);
+    }else{
+      this.presentAlert("Agenda", "Erro", "Contato Não Encontrado!");
+    }
+  }
+
+//no trabalho deverão estar em outro arquivo
+  private validar(campo: any) : boolean{
+    if(!campo){
+      return false;
+    }
+    return true;
+  }
+
+  async presentAlert(cabecalho: string, subcabecalho: string,
+    mensagem: string) {
+    const alert = await this.alertController.create({
+      header: cabecalho,
+      subHeader: subcabecalho,
+      message: mensagem,
+      buttons: ['OK'],
+    });
+    await alert.present();
+  }
+
+  async presentAlertConfirm(cabecalho: string,
+    subcabecalho: string, mensagem: string,
+    acao: any) {
+    const alert = await this.alertController.create({
+      header: cabecalho,
+      subHeader: subcabecalho,
+      message: mensagem,
+      buttons: [
+        {
+          text:'Cancelar',
+          role:'cancelar',
+          cssClass:'secondary',
+          handler: ()=>{
+            console.log("Cancelou")
+          }
+        },
+        {
+          text:'Confirmar',
+          role: 'confirm',
+          handler: (acao)=>{
+           acao
+          }
+        }
+      ],
+    });
+    await alert.present();
+  }
+
 }

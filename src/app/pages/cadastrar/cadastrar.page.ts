@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { Contato } from '../../models/contato';
 import { ContatoService } from '../../services/contato.service';
 
 @Component({
@@ -10,19 +11,22 @@ import { ContatoService } from '../../services/contato.service';
   styleUrls: ['./cadastrar.page.scss'],
 })
 export class CadastrarPage implements OnInit {
-  form_cadastrar : FormGroup;
-  isSubmitted: boolean = false;
   data: string;
-  constructor(private alertController: AlertController, private router: Router,
-     private contatoService: ContatoService, private formBuilder:FormBuilder) {}
+  form_cadastrar: FormGroup;
+  isSubmitted: boolean = false;
+
+  constructor(private alertController: AlertController,
+    private router: Router,
+    private contatoService: ContatoService,
+    private formBuilder: FormBuilder) { }
 
   ngOnInit() {
-    this.data= new Date().toISOString();
+    this.data = new Date().toISOString();
     this.form_cadastrar = this.formBuilder.group({
-      nome: ["", [Validators.required]], 
+      nome: ["", [Validators.required]],
       telefone: ["", [Validators.required, Validators.minLength(10)]],
       genero: ["", [Validators.required]],
-      dataNascimento: ["", [Validators.required]]
+      data_nascimento: ["", [Validators.required]]
     });
   }
 
@@ -30,10 +34,11 @@ export class CadastrarPage implements OnInit {
     return this.form_cadastrar.controls;
   }
 
-  submitForm() : boolean{
+  submitForm(): boolean{
     this.isSubmitted = true;
     if(!this.form_cadastrar.valid){
-      this.presentAlert("Agenda", "Erro", "Todos os campos devem ser preenchidos.");
+      this.presentAlert("Agenda", "Erro",
+       "Todos os campos são Obrigatórios!");
       return false;
     }else{
       this.cadastrar();
@@ -41,14 +46,14 @@ export class CadastrarPage implements OnInit {
   }
 
   private cadastrar(){
-    
     this.contatoService.inserir(this.form_cadastrar.value);
-    this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
+    this.presentAlert("Agenda", "Sucesso", "Cliente Cadastrado!");
     this.router.navigate(["/home"]);
-    
   }
-  
-  async presentAlert(header: string, subHeader: string, message:string) {
+
+
+  async presentAlert(header: string, subHeader: string,
+    message: string) {
     const alert = await this.alertController.create({
       header: header,
       subHeader: subHeader,
@@ -58,4 +63,6 @@ export class CadastrarPage implements OnInit {
 
     await alert.present();
   }
+
+
 }
