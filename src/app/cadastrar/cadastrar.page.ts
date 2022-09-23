@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { Contato } from '../class/contato';
-import { ContatoService } from '../services/contato.service';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { ContatoFirebaseService } from 'src/app/services/contato-firebase.service';
+
 
 @Component({
   selector: 'app-cadastrar',
@@ -10,32 +11,62 @@ import { ContatoService } from '../services/contato.service';
   styleUrls: ['./cadastrar.page.scss'],
 })
 export class CadastrarPage implements OnInit {
-  nome : string;
-  telefone : number;
-  genero :string;
-  dataNascimento: string;
-  constructor(private alertController: AlertController, private router: Router, private conatoService: ContatoService) {}
+  data: string;
+  form_cadastrar: FormGroup;
+  isSubmitted: boolean = false;
+  imagem : any;
+
+  constructor(private alertController: AlertController,
+    private loadingCtrl: LoadingController,
+    private router: Router,
+    private contatoFS: ContatoFirebaseService,
+    private formBuilder: FormBuilder) { }
 
   ngOnInit() {
+    this.data = new Date().toISOString();
+    this.form_cadastrar = this.formBuilder.group({
+      nome: ["", [Validators.required]],
+      telefone: ["", [Validators.required, Validators.minLength(10)]],
+      genero: ["", [Validators.required]],
+      data_nascimento: ["", [Validators.required]],
+      imagem: ["", [Validators.required]]
+    });
   }
-  cadastrar(){
-    console.log(this.genero + " "+ this.dataNascimento)
-    if((this.validar(this.nome)) && this.validar(this.telefone) && this.validar(this.genero) && this.validar(this.dataNascimento)){
-      let contato : Contato = new Contato(this.nome, this.telefone, this.genero, this.dataNascimento);
-      this.conatoService.inserir(contato);
-      this.presentAlert("Agenda", "Sucesso", "Contato cadastrado!");
-      this.router.navigate(["/home"]);
-    }else{
-      this.presentAlert("Agenda", "Erro", "Todos os campos devem ser preenchidos.");
-    }
+
+  get errorControl(){
+    return this.form_cadastrar.controls;
   }
-  private validar(campo: any) : boolean{
-    if(!campo){
+
+  submitForm(): boolean{
+    this.isSubmitted = true;
+    if(!this.form_cadastrar.valid){
+      this.presentAlert("Agenda", "Erro",
+       "Todos os campos são Obrigatórios!");
       return false;
+    }else{
+      this.cadastrar();
     }
-    return true;
   }
-  async presentAlert(header: string, subHeader: string, message:string) {
+
+  private cadastrar(){
+    this.showLoading("Aguarde", 10000)
+    this.contatoFS.inserirContato(this.form_cadastrar.value)
+    .then(()=>{
+      this.loadingCtrl.dismiss();
+      this.presentAlert("Agenda", "Sucesso", "Cliente Cadastrado!");
+      this.router.navigate(["/home"]);
+    })
+    .catch((error)=>{
+      this.loadingCtrl.dismiss();
+      this.presentAlert("Agenda", "Erro", "Erro ao cadastrar");
+      console.log(error);
+    })
+    
+  }
+
+
+  async presentAlert(header: string, subHeader: string,
+    message: string) {
     const alert = await this.alertController.create({
       header: header,
       subHeader: subHeader,
@@ -45,4 +76,13 @@ export class CadastrarPage implements OnInit {
 
     await alert.present();
   }
+  async showLoading(mensagem : string, duracao: number) {
+    const loading = await this.loadingCtrl.create({
+      message: mensagem,
+      duration: duracao,
+    });
+
+    loading.present();
+  }
+
 }
