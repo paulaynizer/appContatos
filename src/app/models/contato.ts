@@ -4,6 +4,7 @@ export class Contato {
   private _telefone: number;
   private _genero: string;
   private _data_nascimento: string;
+  private _downloadURL : any;
 
   constructor(nome: string, telefone: number, genero: string, data_nascimento: string){
     this._nome = nome;
@@ -32,6 +33,14 @@ export class Contato {
     this._telefone = telefone;
   }
 
+  public set dowloadURL(downloadURL : any){
+    this._downloadURL = downloadURL;
+  }
+
+  public get dowloadURL(){
+    return this._downloadURL;
+  }
+  
   public get genero(): string{
     return this._genero;
   }
